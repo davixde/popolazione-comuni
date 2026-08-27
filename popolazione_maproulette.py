@@ -262,6 +262,7 @@ def build_task(element, comune, pop_attuale, data_attuale):
             "data_anpr": comune["data"],
             "fonte": CSV_URL,
             "url": "{}#L{}".format(CSV_GITHUB_URL, comune["riga_csv"]),
+            "riga_csv": "#L{}".format(comune["riga_csv"]),
         },
         "geometry": {"type": "Point", "coordinates": [lon, lat]},
     }
