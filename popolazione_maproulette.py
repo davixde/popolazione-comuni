@@ -34,6 +34,10 @@ from datetime import datetime
 CSV_URL = ("https://raw.githubusercontent.com/italia/anpr-opendata/main/"
            "data/popolazione_residente_export.csv")
 
+# Pagina GitHub del CSV (per il link alla riga del singolo comune).
+CSV_GITHUB_URL = ("https://github.com/italia/anpr-opendata/blob/main/"
+                  "data/popolazione_residente_export.csv")
+
 OVERPASS_QUERY = """[out:json][timeout:300];
 area["ISO3166-1"="IT"]["admin_level"="2"]->.it;
 (
@@ -182,7 +186,8 @@ def load_population(source, user_agent, timeout):
             text = fh.read()
 
     comuni = {}
-    for row in csv.DictReader(io.StringIO(text)):
+    reader = csv.DictReader(io.StringIO(text))
+    for row in reader:
         istat = normalize_istat(row.get("COD_ISTAT_COMUNE"))
         if not istat:
             continue
@@ -201,6 +206,7 @@ def load_population(source, user_agent, timeout):
             "nome": nome,
             "popolazione": int(pop_raw),
             "data": data,
+            "riga_csv": reader.line_num,
         }
     return comuni
 
@@ -244,7 +250,10 @@ def build_task(element, comune, pop_attuale, data_attuale):
         "type": "Feature",
         "properties": {
             "id": osm_id,
-            "nome": tags.get("name") or comune["nome"],
+            # nome attuale su OSM (vuoto se assente) e nome ANPR dal CSV:
+            # servono al review per confrontare i due.
+            "nome": tags.get("name") or "",
+            "nome_csv": comune["nome"],
             "ref_istat": comune["ref_istat"],
             "popolazione_attuale": (str(pop_attuale)
                                     if pop_attuale is not None else ""),
@@ -252,6 +261,7 @@ def build_task(element, comune, pop_attuale, data_attuale):
             "data_attuale": data_attuale,
             "data_anpr": comune["data"],
             "fonte": CSV_URL,
+            "url": "{}#L{}".format(CSV_GITHUB_URL, comune["riga_csv"]),
         },
         "geometry": {"type": "Point", "coordinates": [lon, lat]},
     }
