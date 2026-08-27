@@ -262,7 +262,10 @@ def build_task(element, comune, pop_attuale, data_attuale):
             "data_anpr": comune["data"],
             "fonte": CSV_URL,
             "url": "{}#L{}".format(CSV_GITHUB_URL, comune["riga_csv"]),
-            "riga_csv": "#L{}".format(comune["riga_csv"]),
+            # solo il numero di riga: il "#L" va messo nella parte
+            # statica del link, perche' MapRoulette URL-encoda i valori
+            # dei mustache dentro gli hyperlink (e %23 darebbe 404).
+            "riga_csv": str(comune["riga_csv"]),
         },
         "geometry": {"type": "Point", "coordinates": [lon, lat]},
     }
