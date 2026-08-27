@@ -1,0 +1,45 @@
+name: Aggiorna challenge popolazione comuni
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   
+  workflow_dispatch:
+  push:
+    paths:
+      - "popolazione_maproulette.py"
+      - "README.md"
+      - ".github/**"
+
+permissions:
+  contents: write
+
+jobs:
+  genera-geojson:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Genera il GeoJSON
+        run: |
+          python3 popolazione_maproulette.py \
+            --output comuni-popolazione.geojson \
+            --verbose
+
+      - name: Commit del GeoJSON aggiornato
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add comuni-popolazione-tag-fix.geojson
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica al GeoJSON"
+          else
+            git commit -m "Aggiorna population/date:population dei comuni dai dati ANPR"
+            git pull --rebase --autostash
+            git push
+          fi
