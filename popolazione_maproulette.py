@@ -239,11 +239,11 @@ def build_task(element, comune, pop_attuale, data_attuale):
 
     if pop_attuale == comune["popolazione"]:
         # Popolazione gia' corretta: manca solo la data.
-        new_tags = {"date:population": comune["data"]}
+        new_tags = {"population:date": comune["data"]}
     else:
         new_tags = {
             "population": str(comune["popolazione"]),
-            "date:population": comune["data"],
+            "population:date": comune["data"],
         }
 
     feature = {
