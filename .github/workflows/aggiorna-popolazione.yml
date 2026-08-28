@@ -1,14 +1,7 @@
 name: Aggiorna challenge popolazione comuni
 
 on:
-  schedule:
-    - cron: "0 6 * * *"   
   workflow_dispatch:
-  push:
-    paths:
-      - "popolazione_maproulette.py"
-      - "README.md"
-      - ".github/**"
 
 permissions:
   contents: write
