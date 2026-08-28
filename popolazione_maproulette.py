@@ -11,8 +11,8 @@ Il programma:
    (ref:ISTAT <-> COD_ISTAT_COMUNE, normalizzato a 6 cifre);
 4. per ogni comune in cui il tag population differisce dal valore
    ANPR (o manca) crea una task che imposta population e
-   date:population; se la popolazione e' gia' corretta ma manca
-   date:population la task imposta solo la data;
+   population:date; se la popolazione e' gia' corretta ma manca
+   population:date la task imposta solo la data;
 """
 
 import argparse
@@ -250,7 +250,7 @@ def build_task(element, comune, pop_attuale, data_attuale):
         "type": "Feature",
         "properties": {
             "id": osm_id,
-            # nome attuale su OSM (vuoto se assente) e nome ANPR dal CSV:
+            # nome attuale su OSM (vuoto se assente) e nome ANPR dal CSV:<
             # servono al review per confrontare i due.
             "nome": tags.get("name") or "",
             "nome_csv": comune["nome"],
@@ -328,10 +328,10 @@ def main(argv=None):
             comune["ref_istat"] = istat
 
             pop_attuale = norm_population(tags.get("population"))
-            data_attuale = (tags.get("date:population") or "").strip()
+            data_attuale = (tags.get("population:date") or "").strip()
 
             # Regola: task se la population differisce (o manca) oppure se
-            # la population e' corretta ma manca date:population. Se entrambi
+            # la population e' corretta ma manca population:date. Se entrambi
             # i tag sono gia' allineati non si crea nulla: la data di
             # elaborazione ANPR cambia ogni giorno e aggiornare solo la data
             # genererebbe task inutili.
