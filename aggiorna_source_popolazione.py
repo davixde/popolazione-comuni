@@ -96,8 +96,9 @@ def build_source_task(rid, info, source, current_source):
         return None
     p = info["properties"]
     osm_id = info["key"]
+    task_id = osm_id + "-source"
     new_props = {
-        "id": osm_id,
+        "id": task_id,
         "nome": p.get("nome") or "",
         "nome_csv": p.get("nome_csv") or "",
         "ref_istat": p.get("ref_istat") or "",
@@ -160,6 +161,9 @@ def main(argv=None):
         sources[str(el.get("id"))] = (tags.get("source:population") or "").strip()
     logging.info("Relazioni Overpass: %d", len(elements))
 
+    tasks = load_geojson_tasks(args.geojson)
+    by_id = {t["id"]: t for t in tasks}
+
     new_tasks = []
     stats = {"new": 0, "absent": 0, "already": 0, "no_geom": 0, "notfound": 0}
     for rid in sorted(fixed):
@@ -171,15 +175,16 @@ def main(argv=None):
         if current_source == args.source:
             stats["already"] += 1
             continue
+        task_id = info["key"] + "-source"
+        if task_id in by_id:
+            stats["already"] += 1
+            continue
         fc = build_source_task(rid, info, args.source, current_source)
         if fc is None:
             stats["no_geom"] += 1
             continue
         new_tasks.append((rid, fc, current_source))
         stats["new"] += 1
-
-    tasks = load_geojson_tasks(args.geojson)
-    by_id = {t["id"]: t for t in tasks}
     modified = 0
     modified_ids = []
     missing_open = []
